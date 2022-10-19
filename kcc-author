@@ -1,0 +1,42 @@
+#!/bin/bash
+
+#Get author via -a flag
+while getopts ":a:" opt; do
+  case $opt in
+    a)
+      author="$OPTARG"
+      ;;
+  esac
+done
+    
+for f in *; do
+  # Check if ending is cbr or cbz
+  ending="${f: -4}"
+  
+  if [ $ending == ".cbz" ] || [ $ending == ".cbr" ]
+  then
+    # Some file name vars
+    base=$(echo "$f" | sed 's/...$//')
+    newending="kepub.epub"
+    epub="$base$newending"
+
+    # Convert to epub
+    kcc-c2e -p KoA -q -u "$f" -o "$epub"
+    # Unzip and edit meta to correct author
+    mkdir tmp
+    unzip "$epub" -d tmp
+    rm "$epub"
+    sed -i "s/<dc:creator>KCC<\/dc:creator>/<dc:creator>$author<\/dc:creator>/g" tmp/OEBPS/content.opf
+    zip -r -j -0 "$epub" tmp/*
+    rm tmp -r
+  elif [ $ending == "epub" ]
+  then 
+    # Just unzip and edit meta to correct author
+    mkdir tmp
+    unzip "$f" -d tmp
+    rm "$f"
+    sed -i "s/<dc:creator>KCC<\/dc:creator>/<dc:creator>$author<\/dc:creator>/g" tmp/OEBPS/content.opf
+    zip -r -j -0 "$f" tmp/*
+    rm tmp -r
+  fi
+done
