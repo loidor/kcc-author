@@ -21,7 +21,7 @@ for f in *; do
     epub="$base$newending"
 
     # Convert to epub
-    kcc-c2e -p KoA -q -u "$f" -o "$epub"
+    kcc-c2e -p KoAO -q -u "$f" -o "$epub"
     # Unzip and edit meta to correct author
     mkdir tmp
     unzip "$epub" -d tmp
